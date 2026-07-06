@@ -11,9 +11,25 @@ services:
       - "3000:3000"
     restart: unless-stopped
     depends_on:
+      - backend
       - mongodb
     environment:
       - NODE_ENV=production
+      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-example}@mongodb:27017/auramarket?authSource=admin
+      - VITE_BACKEND_API_URL=http://localhost:8000
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: auramarket-backend:latest
+    container_name: auramarket_backend
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
       - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-example}@mongodb:27017/auramarket?authSource=admin
 
   mongodb:
