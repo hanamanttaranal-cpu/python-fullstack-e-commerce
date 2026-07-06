@@ -1,0 +1,6 @@
+{
+  "name": "E-Commerce Platform",
+  "description": "A fully-featured e-commerce platform with products catalog, search, shopping cart, user authentication, checkout, and order history, built with React and integrated with Firebase Firestore and Google Sign-in.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
