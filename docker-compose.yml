@@ -39,6 +39,11 @@ services:
       - MYSQL_DATABASE=mydatabase
       - MYSQL_USER=admin
       - MYSQL_PASSWORD=password123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mydatabase?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=password123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SERVER_PORT=8000
 
   mysql:
     image: mysql:8.0
