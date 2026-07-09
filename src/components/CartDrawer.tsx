@@ -32,25 +32,25 @@ export default function CartDrawer({
         
         {/* Backdrop overlay */}
         <div 
-          className="absolute inset-0 bg-gray-500/75 backdrop-blur-xs transition-opacity" 
+          className="absolute inset-0 bg-gray-500/75 dark:bg-gray-950/80 backdrop-blur-xs transition-opacity" 
           onClick={onClose}
           id="cart-drawer-backdrop"
         />
 
         <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-          <div className="pointer-events-auto w-screen max-w-md transform bg-white shadow-2xl transition-all flex flex-col h-full justify-between">
+          <div className="pointer-events-auto w-screen max-w-md transform bg-white dark:bg-gray-900 border-l dark:border-gray-850 shadow-2xl transition-all flex flex-col h-full justify-between">
             
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100" id="cart-drawer-header">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800" id="cart-drawer-header">
               <div className="flex items-center gap-2">
-                <ShoppingBag className="h-5 w-5 text-gray-900" />
-                <h2 className="text-base font-bold text-gray-900 font-sans">
+                <ShoppingBag className="h-5 w-5 text-gray-900 dark:text-white" />
+                <h2 className="text-base font-bold text-gray-900 dark:text-white font-sans">
                   Your Shopping Cart ({cartItems.length})
                 </h2>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors"
+                className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
                 id="close-cart-btn"
               >
                 <X className="h-5 w-5" />
@@ -61,16 +61,16 @@ export default function CartDrawer({
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4" id="cart-items-list">
               {cartItems.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-8">
-                  <div className="h-16 w-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                  <div className="h-16 w-16 bg-gray-50 dark:bg-gray-950 rounded-full flex items-center justify-center mb-4 text-gray-400 dark:text-gray-500">
                     <ShoppingBag className="h-8 w-8" />
                   </div>
-                  <h3 className="text-sm font-bold text-gray-900 font-sans">Your bag is empty</h3>
-                  <p className="text-xs text-gray-500 mt-1 max-w-[200px]">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white font-sans">Your bag is empty</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-[200px]">
                     Explore our premium goods to find your match!
                   </p>
                   <button
                     onClick={onClose}
-                    className="mt-6 px-4 py-2 bg-gray-900 text-white font-semibold text-xs rounded-xl hover:bg-gray-800 transition-colors"
+                    className="mt-6 px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold text-xs rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer"
                   >
                     Continue Shopping
                   </button>
@@ -79,57 +79,57 @@ export default function CartDrawer({
                 cartItems.map((item) => (
                   <div 
                     key={item.id} 
-                    className="flex gap-4 p-3 bg-gray-50/50 hover:bg-gray-50 border border-gray-100 hover:border-gray-200/80 rounded-xl transition-all duration-200 group"
+                    className="flex gap-4 p-3 bg-gray-50/50 dark:bg-gray-950/40 hover:bg-gray-50 dark:hover:bg-gray-950 border border-gray-100 dark:border-gray-850 hover:border-gray-200/80 dark:hover:border-gray-800 rounded-xl transition-all duration-200 group"
                     id={`cart-item-${item.id}`}
                   >
                     {/* Thumbnail */}
                     <img
                       src={item.product.image}
                       alt={item.product.name}
-                      className="h-16 w-16 object-cover object-center rounded-lg border border-gray-200/50 bg-white"
+                      className="h-16 w-16 object-cover object-center rounded-lg border border-gray-200/50 dark:border-gray-800 bg-white dark:bg-gray-950"
                     />
 
                     {/* Meta info */}
                     <div className="flex-1 flex flex-col justify-between" id={`cart-item-meta-${item.id}`}>
                       <div>
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className="text-xs font-bold text-gray-900 line-clamp-1 font-sans">
+                          <h4 className="text-xs font-bold text-gray-900 dark:text-white line-clamp-1 font-sans">
                             {item.product.name}
                           </h4>
                           <button
                             onClick={() => onRemoveItem(item.id)}
-                            className="text-gray-400 hover:text-red-500 p-1 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                            className="text-gray-400 dark:text-gray-550 hover:text-red-500 dark:hover:text-red-400 p-1 rounded-md transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                             title="Remove item"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
-                        <p className="text-[10px] text-gray-400 font-mono mt-0.5">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 font-mono mt-0.5">
                           {item.product.category}
                         </p>
                       </div>
 
                       {/* Quantity Modifier & Price */}
                       <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center border border-gray-200 bg-white rounded-lg p-0.5">
+                        <div className="flex items-center border border-gray-200 dark:border-gray-850 bg-white dark:bg-gray-900 rounded-lg p-0.5">
                           <button
                             disabled={item.quantity <= 1}
                             onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                            className="p-1 hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent rounded-md text-gray-600"
+                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:hover:bg-transparent rounded-md text-gray-600 dark:text-gray-400 cursor-pointer"
                           >
                             <Minus className="h-3 w-3" />
                           </button>
-                          <span className="px-2.5 text-xs font-bold text-gray-800 font-mono">{item.quantity}</span>
+                          <span className="px-2.5 text-xs font-bold text-gray-800 dark:text-gray-200 font-mono">{item.quantity}</span>
                           <button
                             disabled={item.quantity >= item.product.stock}
                             onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                            className="p-1 hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent rounded-md text-gray-600"
+                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:hover:bg-transparent rounded-md text-gray-600 dark:text-gray-400 cursor-pointer"
                           >
                             <Plus className="h-3 w-3" />
                           </button>
                         </div>
 
-                        <span className="text-xs font-bold text-gray-900 font-mono">
+                        <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">
                           ${(item.product.price * item.quantity).toFixed(2)}
                         </span>
                       </div>
@@ -141,36 +141,36 @@ export default function CartDrawer({
 
             {/* Bottom Total summary pricing */}
             {cartItems.length > 0 && (
-              <div className="border-t border-gray-100 bg-white p-6 space-y-4" id="cart-drawer-pricing">
+              <div className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 space-y-4" id="cart-drawer-pricing">
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between text-gray-500">
+                  <div className="flex justify-between text-gray-500 dark:text-gray-400">
                     <span>Subtotal</span>
                     <span className="font-mono">${subtotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-gray-500">
+                  <div className="flex justify-between text-gray-500 dark:text-gray-400">
                     <span>Shipping</span>
                     <span className="font-mono">
                       {shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="flex justify-between text-gray-500">
+                  <div className="flex justify-between text-gray-500 dark:text-gray-400">
                     <span>Estimated Tax (8%)</span>
                     <span className="font-mono">${tax.toFixed(2)}</span>
                   </div>
                   {shipping > 0 && (
-                    <p className="text-[10px] text-amber-600 text-right font-semibold">
+                    <p className="text-[10px] text-amber-600 dark:text-amber-500 text-right font-semibold">
                       Add ${(150 - subtotal).toFixed(2)} more for FREE shipping!
                     </p>
                   )}
-                  <div className="border-t border-gray-50 pt-3 flex justify-between text-sm font-bold text-gray-900">
+                  <div className="border-t border-gray-50 dark:border-gray-850 pt-3 flex justify-between text-sm font-bold text-gray-900 dark:text-white">
                     <span>Total Amount</span>
-                    <span className="font-mono text-base font-extrabold text-gray-900">${total.toFixed(2)}</span>
+                    <span className="font-mono text-base font-extrabold text-gray-900 dark:text-white">${total.toFixed(2)}</span>
                   </div>
                 </div>
 
                 <button
                   onClick={onCheckout}
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 group cursor-pointer transition-all active:scale-[0.99]"
+                  className="w-full bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-900 py-3.5 px-4 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 group cursor-pointer transition-all active:scale-[0.99]"
                   id="checkout-btn"
                 >
                   <span>Proceed to Checkout</span>

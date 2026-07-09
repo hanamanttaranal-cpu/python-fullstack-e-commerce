@@ -62,10 +62,24 @@ export interface Review {
   createdAt: string;
 }
 
+export interface Rating {
+  id?: string;
+  productId: string;
+  userId: string;
+  rating: number;
+  createdAt: string;
+}
+
 export interface UserProfile {
   uid: string;
   displayName: string;
   email: string;
   photoURL: string;
+  createdAt: string;
+}
+
+export interface Newsletter {
+  id?: string;
+  email: string;
   createdAt: string;
 }

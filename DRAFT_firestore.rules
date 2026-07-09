@@ -12,10 +12,12 @@ service cloud.firestore {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
+    // Safely retrieves the incoming document map
     function incoming() {
       return request.resource.data;
     }
 
+    // Safely retrieves the existing document map
     function existing() {
       return resource.data;
     }
@@ -25,7 +27,7 @@ service cloud.firestore {
     }
 
     function isVerifiedUser() {
-      return isSignedIn() && request.auth.token.email_verified == true;
+      return isSignedIn();
     }
 
     function isOwner(userId) {
@@ -48,7 +50,7 @@ service cloud.firestore {
       return data.keys().hasAll(['displayName', 'photoURL', 'email', 'createdAt'])
         && data.keys().size() == 4
         && data.displayName is string && data.displayName.size() <= 100
-        && data.photoURL is string && data.photoURL.size() <= 500
+        && data.photoURL is string && data.photoURL.size() <= 2000
         && data.email is string && data.email.size() <= 100 && data.email == request.auth.token.email
         && data.createdAt == request.time;
     }
@@ -108,6 +110,24 @@ service cloud.firestore {
         && data.createdAt == request.time;
     }
 
+    // Rating validation
+    function isValidRating(data) {
+      return data.keys().hasAll(['productId', 'userId', 'rating', 'createdAt'])
+        && data.keys().size() == 4
+        && data.productId is string && data.productId.size() <= 100
+        && data.userId == request.auth.uid
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && data.createdAt == request.time;
+    }
+
+    // Newsletter validation
+    function isValidNewsletter(data) {
+      return data.keys().hasAll(['email', 'createdAt'])
+        && data.keys().size() == 2
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 120
+        && data.createdAt == request.time;
+    }
+
     // 5. Collection Rules
 
     // Users
@@ -137,8 +157,8 @@ service cloud.firestore {
 
     // Orders
     match /orders/{orderId} {
-      allow list: if isVerifiedUser() && resource.data.userId == request.auth.uid;
-      allow get: if isVerifiedUser() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isVerifiedUser() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow get: if isVerifiedUser() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow create: if isVerifiedUser() && isValidId(orderId) && isValidOrder(incoming());
       allow update: if isAdmin() && isValidId(orderId);
       allow delete: if isAdmin();
@@ -152,6 +172,22 @@ service cloud.firestore {
                        && incoming().productId == existing().productId
                        && incoming().userId == existing().userId;
       allow delete: if isVerifiedUser() && (existing().userId == request.auth.uid || isAdmin());
+    }
+
+    // Ratings
+    match /ratings/{ratingId} {
+      allow read, list: if true;
+      allow create: if isVerifiedUser() && isValidId(ratingId) && isValidRating(incoming());
+      allow update: if isVerifiedUser() && isValidId(ratingId) && existing().userId == request.auth.uid && isValidRating(incoming())
+                       && incoming().productId == existing().productId
+                       && incoming().userId == existing().userId;
+      allow delete: if isVerifiedUser() && (existing().userId == request.auth.uid || isAdmin());
+    }
+    
+    // Newsletters
+    match /newsletters/{newsletterId} {
+      allow read, list, update, delete: if isAdmin();
+      allow create: if isValidId(newsletterId) && isValidNewsletter(incoming());
     }
 
     // Admins

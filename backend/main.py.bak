@@ -1,0 +1,420 @@
+import os
+import logging
+from typing import List, Optional
+from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import pymysql
+import pymysql.cursors
+
+# Setup Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("auramarket-backend")
+
+app = FastAPI(
+    title="AuraMarket API Backend",
+    description="Python FastAPI backend serving product catalog and order processing backed by MySQL",
+    version="1.0.0"
+)
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# MySQL Configuration
+MYSQL_HOST = os.getenv("MYSQL_HOST", "mysql")
+MYSQL_PORT = os.getenv("MYSQL_PORT", "3306")
+MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "mydatabase")
+MYSQL_USER = os.getenv("MYSQL_USER", "admin")
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "password123")
+
+def get_connection():
+    return pymysql.connect(
+        host=MYSQL_HOST,
+        port=int(MYSQL_PORT),
+        user=MYSQL_USER,
+        password=MYSQL_PASSWORD,
+        database=MYSQL_DATABASE,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+@app.on_event("startup")
+async def startup_db():
+    logger.info("Initializing database connection...")
+    
+    # 1. Connect without database to ensure it exists
+    try:
+        logger.info(f"Connecting to MySQL server at {MYSQL_HOST}:{MYSQL_PORT} to verify/create database '{MYSQL_DATABASE}'...")
+        conn = pymysql.connect(
+            host=MYSQL_HOST,
+            port=int(MYSQL_PORT),
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with conn.cursor() as cursor:
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DATABASE}")
+        conn.commit()
+        conn.close()
+        logger.info(f"Database '{MYSQL_DATABASE}' verified/created.")
+    except Exception as e:
+        logger.error(f"Failed to ensure database: {e}")
+        
+    # 2. Connect to the database and create tables
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            # Create products table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS products (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    price DECIMAL(10, 2) NOT NULL,
+                    description TEXT NOT NULL,
+                    image TEXT NOT NULL,
+                    category VARCHAR(100) NOT NULL,
+                    stock INT NOT NULL,
+                    rating DECIMAL(3, 2) DEFAULT 4.5,
+                    featured TINYINT(1) DEFAULT 0
+                )
+            """)
+            
+            # Create orders table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS orders (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    customerName VARCHAR(255) NOT NULL,
+                    customerEmail VARCHAR(255) NOT NULL,
+                    shippingAddress TEXT NOT NULL,
+                    totalAmount DECIMAL(10, 2) NOT NULL,
+                    status VARCHAR(50) DEFAULT 'Pending',
+                    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Create order_items table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS order_items (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    orderId INT NOT NULL,
+                    productId VARCHAR(100) NOT NULL,
+                    name VARCHAR(255) NOT NULL,
+                    price DECIMAL(10, 2) NOT NULL,
+                    quantity INT NOT NULL,
+                    image TEXT NOT NULL,
+                    FOREIGN KEY (orderId) REFERENCES orders(id) ON DELETE CASCADE
+                )
+            """)
+        conn.commit()
+        conn.close()
+        logger.info("Database tables verified.")
+        
+        # Seed products if empty
+        seed_products_if_empty()
+    except Exception as e:
+        logger.error(f"Failed to initialize database tables: {e}")
+
+# Pydantic Schemas
+class ProductSchema(BaseModel):
+    name: str
+    price: float
+    description: str
+    image: str
+    category: str
+    stock: int
+    rating: Optional[float] = 4.5
+    featured: Optional[bool] = False
+
+class ProductResponse(ProductSchema):
+    id: str
+
+class OrderItem(BaseModel):
+    productId: str
+    name: str
+    price: float
+    quantity: int
+    image: str
+
+class OrderSchema(BaseModel):
+    customerName: str
+    customerEmail: str
+    shippingAddress: str
+    items: List[OrderItem]
+    totalAmount: float
+    status: Optional[str] = "Pending"
+
+class OrderResponse(OrderSchema):
+    id: str
+
+# Seeding Logic
+SEED_PRODUCTS = [
+    {
+        "name": "Chronos Gold Chronograph",
+        "price": 299.99,
+        "description": "Exquisite golden watch with chronograph sub-dials, sapphire crystal face, and genuine leather strap. Designed for those who value timeless precision.",
+        "image": "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&q=80&w=600",
+        "category": "Accessories",
+        "stock": 15,
+        "rating": 4.8,
+        "featured": True
+    },
+    {
+        "name": "Acoustic Pro Headphones",
+        "price": 189.99,
+        "description": "High-fidelity over-ear headphones with active hybrid noise cancellation, 40-hour battery life, and spatial audio support.",
+        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=600",
+        "category": "Electronics",
+        "stock": 25,
+        "rating": 4.7,
+        "featured": True
+    },
+    {
+        "name": "Suede Nomad Jacket",
+        "price": 149.99,
+        "description": "Premium cognac suede utility jacket with weather-resistant lining, reinforced brass hardware, and dual interior utility pockets.",
+        "image": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=600",
+        "category": "Apparel",
+        "stock": 10,
+        "rating": 4.6,
+        "featured": False
+    },
+    {
+        "name": "Minimalist Leather Pack",
+        "price": 120.00,
+        "description": "Waterproof full-grain leather backpack featuring a padded 16-inch laptop sleeve, hidden passport compartment, and luggage strap.",
+        "image": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=600",
+        "category": "Accessories",
+        "stock": 18,
+        "rating": 4.9,
+        "featured": True
+    },
+    {
+        "name": "Lumina Ceramic Diffuser",
+        "price": 45.00,
+        "description": "Elegant hand-crafted matte ceramic essential oil ultrasonic diffuser with ambient warm LED light ring and automatic safety shut-off.",
+        "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=600",
+        "category": "Lifestyle",
+        "stock": 40,
+        "rating": 4.5,
+        "featured": False
+    }
+]
+
+def seed_products_if_empty():
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) as count FROM products")
+            result = cursor.fetchone()
+            count = result['count'] if result else 0
+            if count == 0:
+                logger.info("Products table is empty. Seeding standard products into MySQL...")
+                for p in SEED_PRODUCTS:
+                    cursor.execute("""
+                        INSERT INTO products (name, price, description, image, category, stock, rating, featured)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (
+                        p["name"], p["price"], p["description"], p["image"],
+                        p["category"], p["stock"], p["rating"], 1 if p["featured"] else 0
+                    ))
+                conn.commit()
+                logger.info("MySQL catalog seeding completed successfully!")
+            else:
+                logger.info(f"MySQL already has {count} products. Skipping seeding.")
+        conn.close()
+    except Exception as e:
+        logger.error(f"Failed to seed products: {e}")
+
+# API Routes
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "service": "AuraMarket Python API Backend",
+        "framework": "FastAPI",
+        "database": "MySQL"
+    }
+
+@app.get("/api/products", response_model=List[ProductResponse])
+async def get_products(category: Optional[str] = None):
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            if category:
+                cursor.execute("SELECT * FROM products WHERE category = %s", (category,))
+            else:
+                cursor.execute("SELECT * FROM products")
+            rows = cursor.fetchall()
+        conn.close()
+        
+        products = []
+        for row in rows:
+            products.append({
+                "id": str(row["id"]),
+                "name": row["name"],
+                "price": float(row["price"]),
+                "description": row["description"],
+                "image": row["image"],
+                "category": row["category"],
+                "stock": row["stock"],
+                "rating": float(row["rating"]) if row["rating"] is not None else 4.5,
+                "featured": bool(row["featured"])
+            })
+        return products
+    except Exception as e:
+        logger.error(f"Error fetching products: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+@app.get("/api/products/{product_id}", response_model=ProductResponse)
+async def get_product(product_id: str):
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM products WHERE id = %s", (product_id,))
+            row = cursor.fetchone()
+        conn.close()
+        if not row:
+            raise HTTPException(status_code=404, detail="Product not found")
+        return {
+            "id": str(row["id"]),
+            "name": row["name"],
+            "price": float(row["price"]),
+            "description": row["description"],
+            "image": row["image"],
+            "category": row["category"],
+            "stock": row["stock"],
+            "rating": float(row["rating"]) if row["rating"] is not None else 4.5,
+            "featured": bool(row["featured"])
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching product: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+@app.post("/api/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+async def create_product(product: ProductSchema):
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO products (name, price, description, image, category, stock, rating, featured)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                product.name, product.price, product.description, product.image,
+                product.category, product.stock, product.rating, 1 if product.featured else 0
+            ))
+            product_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        return {
+            "id": str(product_id),
+            "name": product.name,
+            "price": product.price,
+            "description": product.description,
+            "image": product.image,
+            "category": product.category,
+            "stock": product.stock,
+            "rating": product.rating,
+            "featured": product.featured
+        }
+    except Exception as e:
+        logger.error(f"Error creating product: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+@app.get("/api/orders", response_model=List[OrderResponse])
+async def get_orders(email: Optional[str] = None):
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            if email:
+                cursor.execute("SELECT * FROM orders WHERE customerEmail = %s ORDER BY createdAt DESC", (email,))
+            else:
+                cursor.execute("SELECT * FROM orders ORDER BY createdAt DESC")
+            orders_rows = cursor.fetchall()
+            
+            orders = []
+            for order_row in orders_rows:
+                cursor.execute("SELECT * FROM order_items WHERE orderId = %s", (order_row["id"],))
+                items_rows = cursor.fetchall()
+                
+                items = [{
+                    "productId": row["productId"],
+                    "name": row["name"],
+                    "price": float(row["price"]),
+                    "quantity": row["quantity"],
+                    "image": row["image"]
+                } for row in items_rows]
+                
+                orders.append({
+                    "id": str(order_row["id"]),
+                    "customerName": order_row["customerName"],
+                    "customerEmail": order_row["customerEmail"],
+                    "shippingAddress": order_row["shippingAddress"],
+                    "totalAmount": float(order_row["totalAmount"]),
+                    "status": order_row["status"],
+                    "items": items
+                })
+        conn.close()
+        return orders
+    except Exception as e:
+        logger.error(f"Error fetching orders: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+@app.post("/api/orders", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
+async def create_order(order: OrderSchema):
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            # 1. Insert order
+            cursor.execute("""
+                INSERT INTO orders (customerName, customerEmail, shippingAddress, totalAmount, status)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (
+                order.customerName, order.customerEmail, order.shippingAddress,
+                order.totalAmount, order.status or "Pending"
+            ))
+            order_id = cursor.lastrowid
+            
+            # 2. Insert order items & adjust stock
+            for item in order.items:
+                cursor.execute("""
+                    INSERT INTO order_items (orderId, productId, name, price, quantity, image)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (
+                    order_id, item.productId, item.name, item.price, item.quantity, item.image
+                ))
+                
+                # Try to adjust stock (assuming productId is an int string)
+                try:
+                    product_db_id = int(item.productId)
+                    cursor.execute("SELECT stock FROM products WHERE id = %s", (product_db_id,))
+                    prod = cursor.fetchone()
+                    if prod:
+                        new_stock = max(0, prod["stock"] - item.quantity)
+                        cursor.execute("UPDATE products SET stock = %s WHERE id = %s", (new_stock, product_db_id))
+                except ValueError:
+                    # In case of non-integer productId formats
+                    pass
+                    
+        conn.commit()
+        conn.close()
+        
+        return {
+            "id": str(order_id),
+            "customerName": order.customerName,
+            "customerEmail": order.customerEmail,
+            "shippingAddress": order.shippingAddress,
+            "items": [item.dict() for item in order.items],
+            "totalAmount": order.totalAmount,
+            "status": order.status or "Pending"
+        }
+    except Exception as e:
+        logger.error(f"Error creating order: {e}")
+        raise HTTPException(status_code=500, detail="Database error")

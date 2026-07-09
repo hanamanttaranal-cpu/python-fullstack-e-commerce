@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, LogIn, LogOut, Package, User, Search, Settings } from 'lucide-react';
+import { ShoppingCart, LogIn, LogOut, Package, User, Search, Settings, Sun, Moon } from 'lucide-react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { signInWithGoogle, logOut } from '../firebase';
 import { useToast } from './Toast';
@@ -16,6 +16,8 @@ interface NavbarProps {
   activeTab: 'shop' | 'orders' | 'admin';
   setActiveTab: (tab: 'shop' | 'orders' | 'admin') => void;
   categories: string[];
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
 export default function Navbar({
@@ -29,7 +31,9 @@ export default function Navbar({
   setIsCartOpen,
   activeTab,
   setActiveTab,
-  categories
+  categories,
+  isDarkMode,
+  toggleDarkMode
 }: NavbarProps) {
   const { showToast } = useToast();
   const isAdmin = user?.email === 'hanamanttaranal19@gmail.com';
@@ -55,7 +59,7 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-xs" id="nav-header">
+    <header className="sticky top-0 z-40 w-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 shadow-xs transition-colors duration-300" id="nav-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           
@@ -65,25 +69,25 @@ export default function Navbar({
             onClick={() => { setActiveTab('shop'); setSelectedCategory('All'); }}
             id="nav-logo-container"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-900 text-white shadow-md font-mono font-bold text-lg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-md font-mono font-bold text-lg">
               E
             </div>
-            <span className="text-xl font-bold tracking-tight text-gray-900 hidden sm:block font-sans">
-              Aura<span className="text-gray-500 font-light">Market</span>
+            <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white hidden sm:block font-sans">
+              Aura<span className="text-gray-500 dark:text-gray-400 font-light">Market</span>
             </span>
           </div>
 
           {/* Search Box */}
           <div className="flex-1 max-w-md relative hidden md:block" id="nav-search-desktop">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <Search className="h-4 w-4 text-gray-400" />
+              <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search premium goods..."
-              className="w-full rounded-xl border border-gray-200 py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all duration-200"
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-800 py-2 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/50 dark:bg-gray-900/50 hover:bg-gray-50 dark:hover:bg-gray-900 focus:bg-white dark:focus:bg-gray-950 focus:border-gray-900 dark:focus:border-gray-100 focus:outline-hidden transition-all duration-200"
               id="desktop-search-input"
             />
           </div>
@@ -93,10 +97,10 @@ export default function Navbar({
             {/* Navigation Tabs */}
             <button
               onClick={() => setActiveTab('shop')}
-              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
                 activeTab === 'shop' 
-                  ? 'text-gray-900 bg-gray-50' 
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50/50'
+                  ? 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900' 
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-gray-900/50'
               }`}
               id="tab-shop-btn"
             >
@@ -106,10 +110,10 @@ export default function Navbar({
             {user && (
               <button
                 onClick={() => setActiveTab('orders')}
-                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'orders' 
-                    ? 'text-gray-900 bg-gray-50' 
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50/50'
+                    ? 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900' 
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-gray-900/50'
                 }`}
                 id="tab-orders-btn"
               >
@@ -121,10 +125,10 @@ export default function Navbar({
             {isAdmin && (
               <button
                 onClick={() => setActiveTab('admin')}
-                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'admin' 
-                    ? 'text-gray-900 bg-gray-50' 
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50/50'
+                    ? 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900' 
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-gray-900/50'
                 }`}
                 id="tab-admin-btn"
               >
@@ -133,16 +137,30 @@ export default function Navbar({
               </button>
             )}
 
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900 rounded-xl transition-all duration-200 cursor-pointer"
+              aria-label="Toggle Dark Mode"
+              id="dark-mode-toggle-btn"
+            >
+              {isDarkMode ? (
+                <Sun className="h-5 w-5 text-amber-500 hover:scale-110 transition-transform" />
+              ) : (
+                <Moon className="h-5 w-5 text-indigo-600 hover:scale-110 transition-transform" />
+              )}
+            </button>
+
             {/* Shopping Cart Trigger */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-200"
+              className="relative p-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900 rounded-xl transition-all duration-200 cursor-pointer"
               aria-label="Shopping Cart"
               id="cart-trigger-btn"
             >
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white animate-pulse">
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-gray-950 animate-pulse">
                   {cartCount}
                 </span>
               )}
@@ -150,22 +168,22 @@ export default function Navbar({
 
             {/* User Login/Dropdown */}
             {authLoading ? (
-              <div className="h-9 w-9 rounded-full bg-gray-100 animate-pulse" id="auth-loading-skeleton"></div>
+              <div className="h-9 w-9 rounded-full bg-gray-100 dark:bg-gray-800 animate-pulse" id="auth-loading-skeleton"></div>
             ) : user ? (
-              <div className="flex items-center gap-3 pl-2 border-l border-gray-100" id="user-profile-widget">
+              <div className="flex items-center gap-3 pl-2 border-l border-gray-100 dark:border-gray-800" id="user-profile-widget">
                 <img
                   src={user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || '')}`}
                   alt={user.displayName || 'User Profile'}
                   referrerPolicy="no-referrer"
-                  className="h-8 w-8 rounded-full border border-gray-200 hover:scale-105 transition-transform"
+                  className="h-8 w-8 rounded-full border border-gray-200 dark:border-gray-800 hover:scale-105 transition-transform"
                 />
                 <div className="hidden lg:flex flex-col text-left">
-                  <span className="text-xs font-semibold text-gray-900 leading-none">{user.displayName}</span>
-                  <span className="text-[10px] text-gray-500 mt-0.5 max-w-[120px] truncate">{user.email}</span>
+                  <span className="text-xs font-semibold text-gray-900 dark:text-white leading-none">{user.displayName}</span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 max-w-[120px] truncate">{user.email}</span>
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors cursor-pointer"
                   title="Sign Out"
                   id="sign-out-btn"
                 >
@@ -175,7 +193,7 @@ export default function Navbar({
             ) : (
               <button
                 onClick={handleSignIn}
-                className="flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-gray-800 focus:outline-hidden focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all"
+                className="flex items-center gap-2 rounded-xl bg-gray-900 dark:bg-white px-4 py-2 text-xs font-semibold text-white dark:text-gray-900 shadow-xs hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:ring-offset-2 transition-all cursor-pointer"
                 id="sign-in-btn"
               >
                 <LogIn className="h-3.5 w-3.5" />
@@ -188,18 +206,18 @@ export default function Navbar({
 
         {/* Categories Bar & Mobile Search (Sub-Navbar) */}
         {activeTab === 'shop' && (
-          <div className="border-t border-gray-100 py-3 flex flex-col sm:flex-row items-center justify-between gap-3" id="sub-navbar">
+          <div className="border-t border-gray-100 dark:border-gray-800 py-3 flex flex-col sm:flex-row items-center justify-between gap-3" id="sub-navbar">
             {/* Mobile Search */}
             <div className="w-full relative md:hidden" id="nav-search-mobile">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <Search className="h-4 w-4 text-gray-400" />
+                <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search premium goods..."
-                className="w-full rounded-xl border border-gray-200 py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all duration-200"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 py-2 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/50 dark:bg-gray-900/50 hover:bg-gray-50 dark:hover:bg-gray-900 focus:bg-white dark:focus:bg-gray-950 focus:border-gray-900 dark:focus:border-gray-100 focus:outline-hidden transition-all duration-200"
                 id="mobile-search-input"
               />
             </div>
@@ -210,10 +228,10 @@ export default function Navbar({
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-1.5 text-xs font-semibold rounded-full whitespace-nowrap transition-all duration-200 ${
+                  className={`px-4 py-1.5 text-xs font-semibold rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer ${
                     selectedCategory === category
-                      ? 'bg-gray-900 text-white shadow-xs'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+                      ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xs'
+                      : 'bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                   }`}
                   id={`category-${category.replace(/\s+/g, '-').toLowerCase()}`}
                 >

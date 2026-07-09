@@ -131,17 +131,17 @@ export default function CheckoutModal({
         
         {/* Backdrop overlay */}
         <div 
-          className="fixed inset-0 bg-gray-500/75 backdrop-blur-xs transition-opacity" 
+          className="fixed inset-0 bg-gray-500/75 dark:bg-gray-950/80 backdrop-blur-xs transition-opacity" 
           onClick={onClose}
           id="checkout-backdrop"
         />
 
-        <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl flex flex-col md:flex-row h-auto max-h-[90vh]">
+        <div className="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 border dark:border-gray-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl flex flex-col md:flex-row h-auto max-h-[90vh]">
           
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 z-10 rounded-full p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
+            className="absolute right-4 top-4 z-10 rounded-full p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
             id="close-checkout-btn"
           >
             <X className="h-5 w-5" />
@@ -151,28 +151,28 @@ export default function CheckoutModal({
           <div className="w-full p-6 sm:p-8 overflow-y-auto" id="checkout-body">
             
             {/* Header Stepper */}
-            <div className="flex items-center gap-4 mb-8 border-b border-gray-100 pb-5" id="checkout-stepper">
+            <div className="flex items-center gap-4 mb-8 border-b border-gray-100 dark:border-gray-800 pb-5" id="checkout-stepper">
               <div className="flex items-center gap-2">
                 <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                  step === 1 ? 'bg-gray-900 text-white' : 'bg-emerald-50 text-emerald-700'
+                  step === 1 ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400'
                 }`}>
                   {step === 1 ? '1' : '✓'}
                 </span>
-                <span className="text-xs font-bold text-gray-900">Shipping</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-white">Shipping</span>
               </div>
-              <div className="h-px bg-gray-200 flex-1" />
+              <div className="h-px bg-gray-200 dark:bg-gray-800 flex-1" />
               <div className="flex items-center gap-2">
                 <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                  step === 2 ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400'
+                  step === 2 ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
                 }`}>
                   2
                 </span>
-                <span className={`text-xs font-bold ${step === 2 ? 'text-gray-900' : 'text-gray-400'}`}>Payment</span>
+                <span className={`text-xs font-bold ${step === 2 ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-550'}`}>Payment</span>
               </div>
             </div>
 
             {errorMsg && (
-              <div className="mb-6 flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-700 text-xs font-semibold">
+              <div className="mb-6 flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-xs font-semibold">
                 <ShieldAlert className="h-4 w-4 flex-shrink-0" />
                 <span>{errorMsg}</span>
               </div>
@@ -181,14 +181,14 @@ export default function CheckoutModal({
             {/* Step 1: Shipping Details Form */}
             {step === 1 && (
               <form onSubmit={handleNextStep} className="space-y-4" id="shipping-form">
-                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-3">
-                  <MapPin className="h-4 w-4 text-gray-400" />
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
+                  <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <span>Where should we deliver?</span>
                 </h3>
 
                 <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-6">
                   <div className="sm:col-span-6">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       Full Name
                     </label>
                     <input
@@ -196,12 +196,12 @@ export default function CheckoutModal({
                       required
                       value={shipping.fullName}
                       onChange={(e) => setShipping({ ...shipping, fullName: e.target.value })}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden transition-all"
                     />
                   </div>
 
                   <div className="sm:col-span-6">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       Street Address
                     </label>
                     <input
@@ -210,12 +210,12 @@ export default function CheckoutModal({
                       placeholder="Apt, Suite, Building..."
                       value={shipping.addressLine1}
                       onChange={(e) => setShipping({ ...shipping, addressLine1: e.target.value })}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden transition-all"
                     />
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       City
                     </label>
                     <input
@@ -223,12 +223,12 @@ export default function CheckoutModal({
                       required
                       value={shipping.city}
                       onChange={(e) => setShipping({ ...shipping, city: e.target.value })}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden transition-all"
                     />
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       State / Province
                     </label>
                     <input
@@ -236,12 +236,12 @@ export default function CheckoutModal({
                       required
                       value={shipping.state}
                       onChange={(e) => setShipping({ ...shipping, state: e.target.value })}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden transition-all"
                     />
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       Zip / Postal Code
                     </label>
                     <input
@@ -249,32 +249,32 @@ export default function CheckoutModal({
                       required
                       value={shipping.zipCode}
                       onChange={(e) => setShipping({ ...shipping, zipCode: e.target.value })}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden transition-all"
                     />
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       Country
                     </label>
                     <select
                       value={shipping.country}
                       onChange={(e) => setShipping({ ...shipping, country: e.target.value })}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-950 dark:text-gray-100 focus:outline-hidden transition-all"
                     >
-                      <option>United States</option>
-                      <option>Canada</option>
-                      <option>United Kingdom</option>
-                      <option>Australia</option>
-                      <option>Germany</option>
+                      <option className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">United States</option>
+                      <option className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">Canada</option>
+                      <option className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">United Kingdom</option>
+                      <option className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">Australia</option>
+                      <option className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">Germany</option>
                     </select>
                   </div>
                 </div>
 
-                <div className="mt-8 pt-5 border-t border-gray-100 flex justify-end">
+                <div className="mt-8 pt-5 border-t border-gray-100 dark:border-gray-800 flex justify-end">
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-bold text-xs rounded-xl transition-all shadow-xs cursor-pointer"
+                    className="px-6 py-3 bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-900 font-bold text-xs rounded-xl transition-all shadow-xs cursor-pointer"
                     id="goto-payment-btn"
                   >
                     Continue to Payment
@@ -286,8 +286,8 @@ export default function CheckoutModal({
             {/* Step 2: Payment Details Form */}
             {step === 2 && (
               <form onSubmit={handlePlaceOrder} className="space-y-6" id="payment-form">
-                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-gray-400" />
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <span>Secure Credit Card Payment</span>
                 </h3>
 
@@ -321,7 +321,7 @@ export default function CheckoutModal({
 
                 <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-4">
                   <div className="sm:col-span-4">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       Card Number
                     </label>
                     <input
@@ -331,12 +331,12 @@ export default function CheckoutModal({
                       maxLength={19}
                       value={cardNumber}
                       onChange={(e) => setCardNumber(e.target.value.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim())}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden transition-all"
                     />
                   </div>
 
                   <div className="sm:col-span-4">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       Card Holder Name
                     </label>
                     <input
@@ -344,12 +344,12 @@ export default function CheckoutModal({
                       required
                       value={cardHolder}
                       onChange={(e) => setCardHolder(e.target.value)}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden transition-all"
                     />
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       Expiration Date
                     </label>
                     <input
@@ -359,12 +359,12 @@ export default function CheckoutModal({
                       maxLength={5}
                       value={cardExpiry}
                       onChange={(e) => setCardExpiry(e.target.value)}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden transition-all"
                     />
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 font-mono">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 font-mono">
                       CVV
                     </label>
                     <input
@@ -374,21 +374,21 @@ export default function CheckoutModal({
                       maxLength={3}
                       value={cardCvv}
                       onChange={(e) => setCardCvv(e.target.value)}
-                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 p-2.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-gray-900 focus:outline-hidden transition-all"
+                      className="mt-1 w-full text-xs rounded-lg border border-gray-200 dark:border-gray-850 p-2.5 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50 dark:hover:bg-gray-950/50 focus:bg-white dark:focus:bg-gray-900 focus:border-gray-900 dark:focus:border-white text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden transition-all"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-2xs text-gray-500 bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                <div className="flex items-center gap-2 text-2xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-950/20 p-2.5 rounded-lg border border-gray-100 dark:border-gray-850">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                   <span>Your financial credentials are fully secure and transactions are fully protected under secure Firebase rulesets.</span>
                 </div>
 
-                <div className="mt-8 pt-5 border-t border-gray-100 flex items-center justify-between">
+                <div className="mt-8 pt-5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-xl transition-all cursor-pointer"
+                    className="px-4 py-2 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-850 text-gray-700 dark:text-gray-300 font-semibold text-xs rounded-xl transition-all cursor-pointer"
                     id="back-to-shipping-btn"
                   >
                     Back to Shipping
@@ -397,7 +397,7 @@ export default function CheckoutModal({
                   <button
                     type="submit"
                     disabled={isProcessing}
-                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-md cursor-pointer disabled:bg-gray-200 disabled:text-gray-400"
+                    className="px-6 py-3 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-650 text-white font-bold text-xs rounded-xl transition-all shadow-md cursor-pointer disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-600"
                     id="place-order-btn"
                   >
                     {isProcessing ? 'Authorizing...' : `Pay & Place Order — $${total.toFixed(2)}`}

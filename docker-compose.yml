@@ -12,10 +12,14 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-      - mongodb
+      - mysql
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-example}@mongodb:27017/auramarket?authSource=admin
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=password123
       - VITE_BACKEND_API_URL=http://localhost:8000
 
   backend:
@@ -28,22 +32,28 @@ services:
       - "8000:8000"
     restart: unless-stopped
     depends_on:
-      - mongodb
+      - mysql
     environment:
-      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-example}@mongodb:27017/auramarket?authSource=admin
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=password123
 
-  mongodb:
-    image: mongo:latest
+  mysql:
+    image: mysql:8.0
     container_name: auramarket_db
     ports:
-      - "27017:27017"
+      - "3306:3306"
     restart: unless-stopped
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME:-root}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD:-example}
+      - MYSQL_ROOT_PASSWORD=password123
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=password123
     volumes:
-      - mongodb_data:/data/db
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  mongodb_data:
+  mysql_data:
 

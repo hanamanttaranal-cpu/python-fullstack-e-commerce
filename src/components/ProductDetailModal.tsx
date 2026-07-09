@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Star, X, ShoppingBag, MessageSquare, ShieldAlert } from 'lucide-react';
 import { User as FirebaseUser } from 'firebase/auth';
-import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, setDoc, increment } from 'firebase/firestore';
 import { Product, Review } from '../types';
 import { db, handleFirestoreError, OperationType } from '../firebase';
+import StarRating from './StarRating';
 
 interface ProductDetailModalProps {
   product: Product;
@@ -79,6 +80,16 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
       const reviewsRef = collection(db, 'reviews');
       await addDoc(reviewsRef, newReviewPayload);
 
+      // 1b. Save rating to the 'ratings' collection (uniqueness enforced per user/product)
+      const ratingId = `${user.uid}_${product.id}`;
+      const ratingDocRef = doc(db, 'ratings', ratingId);
+      await setDoc(ratingDocRef, {
+        productId: product.id,
+        userId: user.uid,
+        rating: Number(rating),
+        createdAt: new Date().toISOString()
+      });
+
       // 2. Safely increment the review count and update rating in products collection
       const productRef = doc(db, 'products', product.id);
       
@@ -117,25 +128,25 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
         
         {/* Backdrop overlay */}
         <div 
-          className="fixed inset-0 bg-gray-500/75 backdrop-blur-xs transition-opacity" 
+          className="fixed inset-0 bg-gray-500/75 dark:bg-gray-950/80 backdrop-blur-xs transition-opacity" 
           onClick={onClose}
           id="modal-backdrop"
         />
 
         {/* Modal content container */}
-        <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-4xl flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh] overflow-y-auto md:overflow-hidden">
+        <div className="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-4xl flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh] overflow-y-auto md:overflow-hidden border dark:border-gray-800">
           
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 z-10 rounded-full p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
+            className="absolute right-4 top-4 z-10 rounded-full p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
             id="close-modal-btn"
           >
             <X className="h-5 w-5" />
           </button>
 
           {/* Left Side: Product Image Display */}
-          <div className="w-full md:w-1/2 bg-gray-50 flex items-center justify-center p-6 md:p-8 relative" id="modal-image-panel">
+          <div className="w-full md:w-1/2 bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-6 md:p-8 relative" id="modal-image-panel">
             <img
               src={product.image}
               alt={product.name}
@@ -148,63 +159,63 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
             
             <div id="product-details-content">
               {/* Category */}
-              <span className="text-2xs font-bold text-gray-400 uppercase tracking-wider font-mono">
+              <span className="text-2xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider font-mono">
                 {product.category}
               </span>
 
               {/* Title */}
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mt-1 font-sans">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-1 font-sans">
                 {product.name}
               </h2>
 
               {/* Price & Rating Header */}
-              <div className="mt-3 flex items-center justify-between border-b border-gray-100 pb-3">
-                <span className="text-2xl font-extrabold text-gray-900 font-mono">
+              <div className="mt-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+                <span className="text-2xl font-extrabold text-gray-900 dark:text-white font-mono">
                   ${product.price.toFixed(2)}
                 </span>
                 
-                <div className="flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-lg">
-                  <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                  <span className="text-xs font-bold text-amber-700">{product.rating}</span>
-                  <span className="text-2xs text-amber-600">({product.reviewCount})</span>
+                <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-xl border border-amber-100 dark:border-amber-900/40">
+                  <StarRating rating={product.rating} size={4} />
+                  <span className="text-xs font-bold text-amber-700 dark:text-amber-500">{product.rating.toFixed(1)}</span>
+                  <span className="text-2xs text-amber-600 dark:text-amber-400">({product.reviewCount} ratings)</span>
                 </div>
               </div>
 
               {/* Description */}
               <div className="mt-4">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">
+                <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider font-mono">
                   Description
                 </h4>
-                <p className="mt-1 text-sm text-gray-600 leading-relaxed font-sans">
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-sans">
                   {product.description}
                 </p>
               </div>
 
               {/* Tech Specs Summary */}
-              <div className="mt-4 grid grid-cols-2 gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+              <div className="mt-4 grid grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-950 p-3 rounded-xl border border-gray-100 dark:border-gray-850">
                 <div>
-                  <span className="text-[10px] text-gray-400 block font-mono">Stock Status</span>
-                  <span className={`text-xs font-semibold ${isOutOfStock ? 'text-red-600' : 'text-emerald-600'}`}>
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 block font-mono">Stock Status</span>
+                  <span className={`text-xs font-semibold ${isOutOfStock ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                     {isOutOfStock ? 'Out of Stock' : `${product.stock} units available`}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-gray-400 block font-mono">Delivery</span>
-                  <span className="text-xs font-semibold text-gray-700">Free Express</span>
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 block font-mono">Delivery</span>
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Free Express</span>
                 </div>
               </div>
 
               {/* Reviews Section */}
-              <div className="mt-6 border-t border-gray-100 pt-5">
+              <div className="mt-6 border-t border-gray-100 dark:border-gray-800 pt-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <MessageSquare className="h-4 w-4 text-gray-400" />
-                  <h3 className="text-sm font-bold text-gray-900 font-sans">
+                  <MessageSquare className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white font-sans">
                     Customer Reviews ({reviews.length})
                   </h3>
                 </div>
 
                 {errorMsg && (
-                  <div className="mb-4 flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-700 text-xs font-semibold">
+                  <div className="mb-4 flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-xs font-semibold">
                     <ShieldAlert className="h-4 w-4 flex-shrink-0" />
                     <span>{errorMsg}</span>
                   </div>
@@ -213,29 +224,29 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
                 {/* Reviews List */}
                 <div className="space-y-4 max-h-[220px] overflow-y-auto pr-1" id="reviews-list">
                   {loadingReviews ? (
-                    <div className="py-4 text-center text-xs text-gray-400 animate-pulse">
+                    <div className="py-4 text-center text-xs text-gray-400 dark:text-gray-500 animate-pulse">
                       Loading real-time reviews...
                     </div>
                   ) : reviews.length === 0 ? (
-                    <div className="py-4 text-center text-xs text-gray-400">
+                    <div className="py-4 text-center text-xs text-gray-400 dark:text-gray-500">
                       No reviews yet. Be the first to share your thoughts!
                     </div>
                   ) : (
                     reviews.map((rev) => (
-                      <div key={rev.id} className="p-3 bg-gray-50/50 rounded-xl border border-gray-50 flex flex-col gap-1 text-xs">
+                      <div key={rev.id} className="p-3 bg-gray-50/50 dark:bg-gray-950/40 rounded-xl border border-gray-50 dark:border-gray-850 flex flex-col gap-1 text-xs">
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-gray-800">{rev.userName}</span>
+                          <span className="font-bold text-gray-800 dark:text-gray-200">{rev.userName}</span>
                           <div className="flex items-center gap-0.5 text-amber-500">
                             {[...Array(5)].map((_, i) => (
                               <Star 
                                 key={i} 
-                                className={`h-3 w-3 ${i < rev.rating ? 'fill-current' : 'text-gray-200'}`} 
+                                className={`h-3 w-3 ${i < rev.rating ? 'fill-current' : 'text-gray-200 dark:text-gray-800'}`} 
                               />
                             ))}
                           </div>
                         </div>
-                        <p className="text-gray-600 font-sans mt-0.5">{rev.comment}</p>
-                        <span className="text-[9px] text-gray-400 mt-1 block font-mono">
+                        <p className="text-gray-600 dark:text-gray-300 font-sans mt-0.5">{rev.comment}</p>
+                        <span className="text-[9px] text-gray-400 dark:text-gray-500 mt-1 block font-mono">
                           {new Date(rev.createdAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -244,11 +255,11 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
                 </div>
 
                 {/* Add Review Form */}
-                <div className="mt-5 border-t border-gray-50 pt-4 bg-gray-50/30 p-3 rounded-xl">
+                <div className="mt-5 border-t border-gray-50 dark:border-gray-800 pt-4 bg-gray-50/30 dark:bg-gray-950/20 p-3 rounded-xl">
                   {user ? (
                     <form onSubmit={handleSubmitReview} className="space-y-3">
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-semibold text-gray-700">Your Rating:</span>
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Your Rating:</span>
                         <div className="flex items-center gap-1">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
@@ -257,7 +268,7 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
                               onClick={() => setRating(star)}
                               className="text-amber-400 hover:scale-110 transition-transform cursor-pointer"
                             >
-                              <Star className={`h-4.5 w-4.5 ${star <= rating ? 'fill-current' : 'text-gray-200'}`} />
+                              <Star className={`h-4.5 w-4.5 ${star <= rating ? 'fill-current' : 'text-gray-200 dark:text-gray-800'}`} />
                             </button>
                           ))}
                         </div>
@@ -269,7 +280,7 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
                           value={comment}
                           onChange={(e) => setComment(e.target.value)}
                           placeholder="Share your experience with this product..."
-                          className="w-full text-xs rounded-lg border border-gray-200 p-2 text-gray-900 placeholder-gray-400 focus:outline-hidden focus:border-gray-900 focus:bg-white bg-white transition-all"
+                          className="w-full text-xs rounded-lg border border-gray-200 dark:border-gray-800 p-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:border-gray-900 dark:focus:border-gray-100 focus:bg-white dark:focus:bg-gray-900 bg-white dark:bg-gray-950 transition-all"
                           required
                         />
                       </div>
@@ -277,14 +288,14 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
                       <button
                         type="submit"
                         disabled={submittingReview || !comment.trim()}
-                        className="w-full py-1.5 px-4 rounded-lg bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-bold transition-colors shadow-xs flex items-center justify-center gap-1 cursor-pointer"
+                        className="w-full py-1.5 px-4 rounded-lg bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-650 text-white dark:text-gray-900 text-xs font-bold transition-colors shadow-xs flex items-center justify-center gap-1 cursor-pointer"
                       >
                         {submittingReview ? 'Posting...' : 'Submit Review'}
                       </button>
                     </form>
                   ) : (
-                    <div className="text-center p-3 text-xs text-gray-500">
-                      Please <span className="font-bold text-gray-900">Sign In</span> above to write a product review.
+                    <div className="text-center p-3 text-xs text-gray-500 dark:text-gray-400">
+                      Please <span className="font-bold text-gray-900 dark:text-white">Sign In</span> above to write a product review.
                     </div>
                   )}
                 </div>
@@ -293,7 +304,7 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
             </div>
 
             {/* Bottom Add-To-Cart CTA Panel */}
-            <div className="mt-6 pt-4 border-t border-gray-100" id="modal-cta-panel">
+            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800" id="modal-cta-panel">
               <button
                 disabled={isOutOfStock}
                 onClick={() => {
@@ -302,8 +313,8 @@ export default function ProductDetailModal({ product, user, onAddToCart, onClose
                 }}
                 className={`w-full py-3.5 px-6 rounded-xl flex items-center justify-center gap-2.5 font-bold text-sm shadow-md cursor-pointer transition-all ${
                   isOutOfStock 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                    : 'bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.98]'
+                    ? 'bg-gray-100 dark:bg-gray-850 text-gray-400 dark:text-gray-600 cursor-not-allowed' 
+                    : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-[0.98]'
                 }`}
                 id={`modal-add-to-cart-btn-${product.id}`}
               >
