@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: auramarket-frontend:latest
-    container_name: auramarket_app
+    container_name: auramarket_apps
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -27,7 +27,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: auramarket-backend:latest
-    container_name: auramarket_backend
+    container_name: auramarket_backends
     ports:
       - "8000:8000"
     restart: unless-stopped
@@ -47,7 +47,7 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: auramarket_db
+    container_name: auramarket_dbs
     ports:
       - "3306:3306"
     restart: unless-stopped
